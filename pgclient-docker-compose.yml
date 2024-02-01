@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  pgclient:
+    image: postgres:latest
+    command: ["psql", "-h", "db", "-U", "postgres", "-d", "Keibitz"]
+    volumes:
+      - /path/to/your/sql-scripts:/scripts  # Optional: Mount a directory with SQL scripts

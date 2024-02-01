@@ -1,0 +1,20 @@
+#  Explanation:
+# This configuration sets up a PostgreSQL container named db.
+# postgres_data volume is used to persist the database data.
+# The environment variables POSTGRES_DB, POSTGRES_USER, and POSTGRES_PASSWORD
+# are used to set up the database name, user, and password.
+# Port 5432 is exposed and mapped to the host.
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: project_k-db-1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: Keibitz
+    ports:
+      - "5432:5432"
+    networks:
+      - project_k_default  # Use the same network as your Django app
