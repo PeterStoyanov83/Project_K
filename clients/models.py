@@ -1,5 +1,5 @@
 from django.db import models
-import datetime
+
 
 class Client(models.Model):
     LOCATION_CHOICES = [
@@ -10,14 +10,27 @@ class Client(models.Model):
         ('various', 'Various'),
     ]
 
-    name = models.CharField(max_length=50)
-    location = models.CharField(max_length=100, choices=LOCATION_CHOICES)
+    name = models.CharField(
+        max_length=50
+    )
+    location = models.CharField(
+        max_length=100,
+        choices=LOCATION_CHOICES
+    )
     date_of_entry = models.DateField()
-    date_of_exit = models.DateField(null=True, blank=True)
-    # Omitting direct relationship to courses for brevity
+    date_of_exit = models.DateField(
+        null=True,
+        blank=True
+    )
+    signed_agreement = models.BooleanField(
+        default=False
+    )
+
+    files = models.ManyToManyField('ClientFile', related_name='clients')
 
     def __str__(self):
         return self.name
+
 
 class Course(models.Model):
     DAY_OF_WEEK_CHOICES = [
@@ -35,15 +48,42 @@ class Course(models.Model):
         ('13:30-15:00', '13:30-15:00'),
     ]
 
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, default="")
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='courses')
+    name = models.CharField(
+        max_length=100
+    )
+    description = models.TextField(
+        blank=True,
+        default=""
+    )
+
     start_date = models.DateField()
+
     end_date = models.DateField()
-    day_of_week = models.CharField(max_length=9, choices=DAY_OF_WEEK_CHOICES, default='Monday')
-    time_slot = models.CharField(max_length=20, choices=TIME_SLOT_CHOICES, default='08:30-10:00')
+
+    day_of_week = models.CharField(
+        max_length=9,
+        choices=DAY_OF_WEEK_CHOICES,
+        default='Monday'
+    )
+
+    time_slot = models.CharField(
+        max_length=20,
+        choices=TIME_SLOT_CHOICES,
+        default='------'
+    )
+    clients = models.ManyToManyField(
+        'Client',
+        related_name='courses'
+    )
 
     def __str__(self):
         return f"{self.name} ({self.day_of_week} at {self.time_slot})"
 
-# Assuming ClientFile remains unchanged for brevity
+
+class ClientFile(models.Model):
+    client = models.ForeignKey(Client, related_name='client_files', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='client_files/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"File for {self.client.name} uploaded on {self.uploaded_at}"

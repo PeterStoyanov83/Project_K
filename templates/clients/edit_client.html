@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save Changes">
+  </form>
+
+  <a href="{% url 'clients:clients_client_change' original.id %}">Back to Client Profile</a>
+
+{% endblock %}

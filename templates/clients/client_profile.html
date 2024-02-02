@@ -1,0 +1,67 @@
+{% extends "admin/change_form.html" %}
+{% block content %}
+<div class="client-profile">
+    <div class="client-buttons">
+        <a href="{% url 'clients_edit_client_change' original.id %}" class="button">Edit</a>
+        <a href="{% url 'admin:clients_client_change' original.id %}" class="button">Back</a>
+    </div>
+</div>
+
+    <h1>{{ client.name }}</h1>
+    
+    <table>
+        <tr>
+            <td>Location:</td>
+            <td>{{ client.get_location_display }}</td> <!-- Use get_location_display to display the choice field -->
+        </tr>
+        <tr>
+            <td>Date of Entry:</td>
+            <td>{{ client.date_of_entry }}</td>
+        </tr>
+        <tr>
+            <td>Date of Exit:</td>
+            <td>{{ client.date_of_exit }}</td>
+        </tr>
+        <tr>
+            <td>Signed Agreement:</td>
+            <td>{{ client.signed_agreement }}</td>
+        </tr>
+        
+    </table>
+    
+    <!-- display the related files  -->
+    {% if client.files.all %}
+    <h2>Files</h2>
+    <ul>
+        {% for file in client.files.all %}
+        <li>
+            <span class="file-icon">{{ file.get_icon }}</span>
+            <span class="file-name">{{ file.file.name }}</span>
+            <a href="{{ file.file.url }}" class="button" download>Download</a>
+            <a href="{{ file.file.url }}" class="button" target="_blank">View</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}
+<style> 
+.client-buttons {
+    text-align: center;
+    margin-bottom: 20px; /* Adjust the margin as needed for spacing */
+}
+
+.button {
+    display: inline-block;
+    padding: 10px 20px; /* Adjust the padding to make buttons the same size */
+    margin: 0 10px; /* Adjust the margin to space the buttons equally */
+}
+
+.client-profile h1 {
+    text-align: center;
+    font-size: 24px; /* Adjust the font size as needed */
+    margin-bottom: 20px; /* Adjust the margin as needed */
+}
+
+/* Add any other styles you need for the rest of the client data */
+</style>
