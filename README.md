@@ -51,5 +51,5 @@ After the research a new repository was open.
 ### Testing the Data Functionality
 
 - Creating a Python script that populates the database with dummy data to test the functionality and representation for the end user.
-- The script is implemented as a command in the 'clients' app. It can be run using the command `python manage.py data_populator`.
+- The script is implemented as a command in the 'clients' app. It can be run using the command `python manage.py populate_data`.
 
