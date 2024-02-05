@@ -12,7 +12,7 @@ After the research a new repository was open.
 ## 05.02.24 - Editing and customisation in representation of the data. 
 
 - work on the custom views, admin and urls.(not entirely finished)
-
+- 
 
 ## 31.01.24 - Initialising the project 
 
