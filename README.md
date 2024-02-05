@@ -3,11 +3,19 @@
 Project K is a Django-based project focused on data management and administrative control. It includes two primary
 Django apps for different functionalities.
 
-## 31.01.24 - Initialising the project 
-
 After the research a new repository was open. 
 
 [here is the link to the research](https://github.com/PeterStoyanov83/research_for_project_K) 
+
+
+
+## 05.02.24 - Editing and customisation in representation of the data. 
+
+- work on the custom views, admin and urls.(not entirely finished)
+- 
+
+## 31.01.24 - Initialising the project 
+
 
 ### Django Project Setup
 
