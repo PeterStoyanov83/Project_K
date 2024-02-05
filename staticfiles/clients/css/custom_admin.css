@@ -1,0 +1,7 @@
+/* custom_admin.css */
+body {
+    background-image: url('clients/static/clients/images/background.jpg'); /* Replace with the path to your background image */
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+

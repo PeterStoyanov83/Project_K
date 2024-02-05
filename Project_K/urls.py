@@ -18,14 +18,7 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from clients import views
-
 urlpatterns = [
-    path('client/<int:object_id>/change/', views.client_profile_view, name='client_profile_view'),
-
     path('admin/', admin.site.urls),
-
-    path('clients/', include(('clients.urls', 'clients'), namespace='clients')),
+    path('clients/', include('clients.urls')),
 ]
-
-app_name = 'clients'
