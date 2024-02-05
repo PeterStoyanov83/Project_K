@@ -1,45 +1,50 @@
+# admin.py of your clients app
+
 from django.contrib import admin
-from django.db.models import Count  # Import Count function
-from .models import Client, Course, ClientFile
+from django.urls import path
+from django.utils.html import format_html
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from .models import Client
+from django.shortcuts import get_object_or_404, render
 
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location', 'signed_agreement_column', 'list_files')
-    readonly_fields = ('name', 'location', 'date_of_entry', 'date_of_exit', 'signed_agreement', 'files')
+    list_display = (
+        'name',
+        'location',
+        'signed_agreement',
+        'view_files_link'
+    )
 
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        queryset = queryset.annotate(courses_count=Count('courses'))  # Use Count function
-        return queryset
+    def view_files_link(self, obj):
+        return format_html(
+            '<a href="{}">View Files</a>',
+            reverse('admin:client_files',
+                    args=[obj.pk]))
 
-    def signed_agreement_column(self, obj):
-        return "Yes" if obj.signed_agreement else "No"
+    view_files_link.short_description = 'Files'
 
-    signed_agreement_column.short_description = 'Signed Agreement'
+    def edit_link(self, obj):
+        return format_html(
+            '<a href="{}">Edit</a>',
+            reverse('admin:clients_client_change',
+                    args=[obj.pk]))
 
-    def list_files(self, obj):
-        return ', '.join([file.file_type for file in obj.files.all()])
+    edit_link.short_description = 'Edit Client'
 
-    list_files.short_description = 'Files'
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('<int:object_id>/files/', self.admin_site.admin_view(self.view_files), name='client_files'),
+        ]
+        return custom_urls + urls
 
-    def courses_count(self, obj):
-        return obj.courses_count
+    def view_files(self, request, object_id):
+        client = get_object_or_404(Client, pk=object_id)
 
-    courses_count.short_description = 'Number of Courses'
-    change_form_template = 'clients/client_profile.html'
+        return render(request, 'admin/view_files.html', {'client': client})
 
+    view_files_link.short_description = 'Files'
 
-@admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'start_date', 'end_date', 'client_count')
-
-    def get_queryset(self, request):
-        queryset = super().get_queryset(request)
-        queryset = queryset.annotate(client_count=Count('clients'))  # Use Count function
-        return queryset
-
-    def client_count(self, obj):
-        return obj.client_count
-
-    client_count.short_description = 'Number of Clients'

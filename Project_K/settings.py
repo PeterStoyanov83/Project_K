@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,10 +77,10 @@ WSGI_APPLICATION = 'Project_K.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Keibitz',  # Your database name
+        'NAME': 'Keibitz',
         'USER': 'postgres',
-        'PASSWORD': 'pass',  # Use the password you specified in Docker Compose
-        'HOST': 'localhost',  # Docker Compose service name
+        'PASSWORD': 'pass',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
@@ -124,6 +125,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

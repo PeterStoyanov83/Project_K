@@ -1,6 +1,14 @@
 from django.db import models
 
 
+class ClientFile(models.Model):
+    file = models.FileField(upload_to='client_files/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.file.name} uploaded on {self.uploaded_at}"
+
+
 class Client(models.Model):
     LOCATION_CHOICES = [
         ('office_center', 'Office Center'),
@@ -25,8 +33,12 @@ class Client(models.Model):
     signed_agreement = models.BooleanField(
         default=False
     )
+    files = models.ManyToManyField(
+        ClientFile,
+        related_name='clients',
 
-    files = models.ManyToManyField('ClientFile', related_name='clients')
+
+    )
 
     def __str__(self):
         return self.name
@@ -80,10 +92,4 @@ class Course(models.Model):
         return f"{self.name} ({self.day_of_week} at {self.time_slot})"
 
 
-class ClientFile(models.Model):
-    client = models.ForeignKey(Client, related_name='client_files', on_delete=models.CASCADE)
-    file = models.FileField(upload_to='client_files/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"File for {self.client.name} uploaded on {self.uploaded_at}"

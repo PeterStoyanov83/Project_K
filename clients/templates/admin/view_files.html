@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div class="module">
+    <h1>Files for {{ client.name }}</h1>
+
+    <table>
+        <tr>
+            <th>File Name</th>
+            <th>Uploaded At</th>
+        </tr>
+        {% for file in client.files.all %}
+        <tr>
+            <td><a href="{{ file.file.url }}">{{ file.file.name }}</a></td>
+            <td>{{ file.uploaded_at }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">No files have been uploaded for this client.</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
