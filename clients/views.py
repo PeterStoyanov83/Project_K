@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.http import Http404
 
-from .forms import ClientForm
-from .models import Client
+from .forms import ClientForm, ClientFileForm
+from .models import Client, ClientFile
 
 
 @login_required  # Only logged-in users can view client profiles
@@ -14,17 +14,24 @@ def client_profile_view(request, object_id):
     return render(request, 'clients/client_profile.html', context)
 
 
-@login_required  # Only logged-in users can edit client profiles
+@login_required
 def edit_client_view(request, object_id):
     client = get_object_or_404(Client, id=object_id)
     if request.method == 'POST':
         form = ClientForm(request.POST, instance=client)
-        if form.is_valid():
+        file_form = ClientFileForm(request.POST, request.FILES)
+        if form.is_valid() and (not file_form.is_valid() or not file_form.cleaned_data.get('file')):
             form.save()
+            return redirect('clients:client_profile_view', object_id=client.id)
+        elif file_form.is_valid():
+            client_file = file_form.save(commit=False)
+            client_file.save()
+            client.files.add(client_file)
             return redirect('clients:client_profile_view', object_id=client.id)
     else:
         form = ClientForm(instance=client)
-    context = {'form': form, 'client': client}
+        file_form = ClientFileForm()  # Empty form for new file upload
+    context = {'form': form, 'file_form': file_form, 'client': client}
     return render(request, 'clients/client_edit.html', context)
 
 

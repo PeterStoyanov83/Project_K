@@ -55,7 +55,7 @@ ROOT_URLCONF = 'Project_K.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [BASE_DIR / 'clients' / 'admins' / 'templates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {

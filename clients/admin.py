@@ -31,4 +31,4 @@ class ClientAdmin(admin.ModelAdmin):
         # This is where you implement your file viewing logic
         client = get_object_or_404(Client, pk=object_id)
         # Assuming you have a template named 'admin/view_files.html'
-        return render(request, 'admin/view_files.html', {'client': client})
+        return render(request, 'admin/templates/clients/view_files.html', {'client': client})

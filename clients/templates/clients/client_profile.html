@@ -1,9 +1,10 @@
 {% extends "admin/change_form.html" %}
 {% block content %}
 <div class="client-profile">
+    <a href="{% url 'clients:client_profile_view' client.id %}">View Profile</a>
     <div class="client-buttons">
-    <a href="{% url 'admin:clients_client_change' client.id %}" class="button">Edit</a>
-    <a href="{% url 'admin:clients_client_changelist' %}" class="button">Back</a>
+        <a href="{% url 'admin:clients_client_change' client.id %}" class="button">Edit</a>
+        <a href="{% url 'admin:clients_client_changelist' %}" class="button">Back</a>
 </div>
 
 </div>
@@ -43,6 +44,12 @@
         </li>
         {% endfor %}
     </ul>
+        <h2>Attach File</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ file_form.as_p }} <!-- This is the form for file upload -->
+        <button type="submit">Upload File</button>
+    </form>
     {% endif %}
 </div>
 {% endblock %}
