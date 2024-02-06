@@ -2,13 +2,17 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.http import Http404
+
+from .forms import ClientForm
 from .models import Client
+
 
 @login_required  # Only logged-in users can view client profiles
 def client_profile_view(request, object_id):
     client = get_object_or_404(Client, id=object_id)
     context = {'client': client, 'edit': False}  # 'edit': False to indicate view-only mode
     return render(request, 'clients/client_profile.html', context)
+
 
 @login_required  # Only logged-in users can edit client profiles
 def edit_client_view(request, object_id):
@@ -22,6 +26,7 @@ def edit_client_view(request, object_id):
         form = ClientForm(instance=client)
     context = {'form': form, 'client': client}
     return render(request, 'clients/client_edit.html', context)
+
 
 class ClientDetailView(View):
     def get(self, request, *args, **kwargs):
