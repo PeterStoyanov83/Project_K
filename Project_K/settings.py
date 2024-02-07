@@ -55,7 +55,7 @@ ROOT_URLCONF = 'Project_K.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'clients' / 'admins' / 'templates']
+        'DIRS': [BASE_DIR / 'templates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -68,6 +68,9 @@ TEMPLATES = [
         },
     },
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 WSGI_APPLICATION = 'Project_K.wsgi.application'
 

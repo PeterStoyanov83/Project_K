@@ -1,9 +1,64 @@
 from django.db import models
 
 
+# Your existing ClientFile and Client models would remain unchanged.
+
+class DayOfWeek(models.Model):
+    name = models.CharField(
+        max_length=15
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class TimeSlot(models.Model):
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    def __str__(self):
+        return f"{self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
+
+
+class Course(models.Model):
+    # Removed the DAY_OF_WEEK_CHOICES replaced with DayOfWeek model.
+    # Removed the TIME_SLOT_CHOICES replaced with TimeSlot model.
+
+    name = models.CharField(
+        max_length=100
+    )
+    description = models.TextField(
+        blank=True,
+        default=""
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    clients = models.ManyToManyField(
+        'Client',
+        related_name='courses'
+    )
+
+    # These are the new fields that relate to the DayOfWeek and TimeSlot models
+    days_of_week = models.ManyToManyField(
+        DayOfWeek
+    )
+    time_slots = models.ManyToManyField(
+        TimeSlot
+    )
+
+    def __str__(self):
+        days = ', '.join(day.name for day in self.days_of_week.all())
+        times = ', '.join(str(slot) for slot in self.time_slots.all())
+        return f"{self.name} ({days} at {times})"
+
+
 class ClientFile(models.Model):
-    file = models.FileField(upload_to='client_files/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(
+        upload_to='client_files/'
+    )
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
         return f"{self.file.name} uploaded on {self.uploaded_at}"
@@ -37,59 +92,7 @@ class Client(models.Model):
         ClientFile,
         related_name='clients',
 
-
     )
 
     def __str__(self):
         return self.name
-
-
-class Course(models.Model):
-    DAY_OF_WEEK_CHOICES = [
-        ('Monday', 'Monday'),
-        ('Tuesday', 'Tuesday'),
-        ('Wednesday', 'Wednesday'),
-        ('Thursday', 'Thursday'),
-        ('Friday', 'Friday'),
-        ('Saturday', 'Saturday'),
-        ('Sunday', 'Sunday'),
-    ]
-    TIME_SLOT_CHOICES = [
-        ('08:30-10:00', '08:30-10:00'),
-        ('10:30-12:00', '10:30-12:00'),
-        ('13:30-15:00', '13:30-15:00'),
-    ]
-
-    name = models.CharField(
-        max_length=100
-    )
-    description = models.TextField(
-        blank=True,
-        default=""
-    )
-
-    start_date = models.DateField()
-
-    end_date = models.DateField()
-
-    day_of_week = models.CharField(
-        max_length=9,
-        choices=DAY_OF_WEEK_CHOICES,
-        default='Monday'
-    )
-
-    time_slot = models.CharField(
-        max_length=20,
-        choices=TIME_SLOT_CHOICES,
-        default='------'
-    )
-    clients = models.ManyToManyField(
-        'Client',
-        related_name='courses'
-    )
-
-    def __str__(self):
-        return f"{self.name} ({self.day_of_week} at {self.time_slot})"
-
-
-

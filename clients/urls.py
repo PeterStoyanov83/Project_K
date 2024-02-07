@@ -6,13 +6,8 @@ from . import views
 app_name = 'clients'
 
 urlpatterns = [
-    # Path for the read-only client profile view
-    path('<int:object_id>/', views.client_profile_view, name='client_profile_view'),
-
-    # Path for the editable client profile view
-    path('<int:object_id>/edit/', views.edit_client_view, name='edit_client_change'),
-
-    # Path for the detailed client view (if this is different from the above view-only profile)
-    path('<int:pk>/detail/', views.ClientDetailView.as_view(), name='client_detail'),
+    path('clients/', views.client_list, name='client_list'),
+    path('clients/<int:pk>/', views.client_detail, name='client_detail'),
+    path('courses/', views.course_list, name='course_list'),
+    path('courses/<int:pk>/', views.course_detail, name='course_detail'),
 ]
-

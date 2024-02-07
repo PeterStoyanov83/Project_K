@@ -1,0 +1,25 @@
+{% extends "clients/admins/templates/base.html" %}
+
+{% block title %}Client List{% endblock %}
+
+{% block content %}
+<h1>Client List</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <!-- Add other table headers here -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for client in clients %}
+        <tr>
+            <td>{{ client.name }}</td>
+            <td>{{ client.location }}</td>
+            <!-- Add other client details here -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

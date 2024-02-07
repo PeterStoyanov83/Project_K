@@ -1,0 +1,18 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+    <h2>Course Details: {{ course.name }}</h2>
+    <p>Description: {{ course.description }}</p>
+    <p>Start Date: {{ course.start_date }}</p>
+    <p>End Date: {{ course.end_date }}</p>
+    <p>Day of Week: {{ course.day_of_week }}</p>
+    <p>Time Slot: {{ course.time_slot }}</p>
+    <h3>Clients:</h3>
+    <ul>
+        {% for client in course.clients.all %}
+            <li><a href="{% url 'clients:client_detail' client.pk %}">{{ client.name }}</a></li>
+        {% empty %}
+            <li>No clients enrolled.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

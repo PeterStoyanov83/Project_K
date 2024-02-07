@@ -1,0 +1,43 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Site{% endblock %}</title>
+    {% block extrahead %}{% endblock %}
+    {% block stylesheet %}
+    <!-- Add your site's stylesheet here -->
+{#    <link rel="stylesheet" href="{% static 'css/style.css' %}">#}
+    {% endblock %}
+</head>
+<body>
+    <header>
+        <!-- Header content like site title or logo -->
+    </header>
+
+    <nav>
+        <!-- Navigation bar -->
+        <ul>
+            <!-- Add other navigation links here -->
+            <li><a href="{% url 'clients:client_list' %}">Client List</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        {% block content %}
+        <!-- The content block where individual page content will be placed -->
+        {% endblock %}
+    </main>
+
+    <footer>
+        <!-- Footer content like contact info or copyright statements -->
+    </footer>
+
+    {% block javascript %}
+    <!-- JavaScript files can be added here -->
+    <script src="{% static 'js/script.js' %}"></script>
+    {% endblock %}
+</body>
+</html>

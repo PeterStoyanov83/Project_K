@@ -1,0 +1,11 @@
+<!-- templates/clients/client_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Clients</h2>
+    <ul>
+        {% for client in clients %}
+            <li><a href="{% url 'clients:client_detail' client.pk %}">{{ client.name }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

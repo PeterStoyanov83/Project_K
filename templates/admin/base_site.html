@@ -1,6 +1,13 @@
 {% extends "admin/base.html" %}
-{% load static %}
 
-{% block extrahead %}
-    <link rel="stylesheet" type="text/css" href="{% static 'clients/css/custom_admin.css' %}">
+{% block title %}My Admin - {{ title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Project K</a></h1>
+{% endblock %}
+
+{% block extrastyle %}
+<style>
+    /* Add custom styles here */
+</style>
 {% endblock %}

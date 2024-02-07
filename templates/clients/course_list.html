@@ -1,0 +1,10 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+    <h2>Courses</h2>
+    <ul>
+        {% for course in courses %}
+            <li><a href="{% url 'clients:course_detail' course.pk %}">{{ course.name }}</a> - {{ course.day_of_week }} at {{ course.time_slot }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
