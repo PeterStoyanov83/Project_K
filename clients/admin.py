@@ -3,6 +3,7 @@ from .models import Client, ClientFile, Course, CourseSchedule
 from django import forms
 from .forms import ClientFileForm
 from django.utils.html import format_html
+from django.urls import reverse
 
 
 class CourseScheduleInline(admin.TabularInline):
@@ -73,21 +74,42 @@ class ClientAdminForm(forms.ModelForm):
 class ClientAdmin(admin.ModelAdmin):
     form = ClientAdminForm
     inlines = [ClientFileInline, ]
-    list_display = ['name', 'location', 'date_of_entry', 'date_of_exit', 'signed_agreement', ]
+    list_display = ['name', 'location', 'date_of_entry', 'date_of_exit', 'signed_agreement']
+    readonly_fields = ['courses_list', ]  # Add this to your existing readonly_fields if you have any
+
+    # Method to display the courses on the client change page
+    def courses_list(self, obj):
+        if obj.pk:  # checks if the client object exists
+            courses = obj.enrolled_courses.all()
+            if courses:
+                links = [
+                    f"<a href='{reverse('admin:clients_course_change', args=[course.pk])}'>{course.name}</a>"
+                    for course in courses
+                ]
+                return format_html("<ul>" + "".join(f"<li>{link}</li>" for link in links) + "</ul>")
+        return "No courses enrolled"
+    courses_list.short_description = "Enrolled Courses"
 
 
 # Admin for Course
 class CourseAdmin(admin.ModelAdmin):
-    inlines = [CourseScheduleInline,]
+    inlines = [CourseScheduleInline, ]
 
     # Remove 'days_of_week' and 'time_slot' from list_display
-    list_display = ['name', 'start_date', 'end_date']
+    list_display = ['name', 'platform', 'start_date', 'end_date']
     filter_horizontal = ('clients',)
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(CourseAdmin, self).get_form(request, obj, **kwargs)
+
+        form.base_fields['other_platform_comment'].disabled = False
+        return form
 
     # Optionally, you can add a method to display a summary of the schedules
     def schedule_summary(self, obj):
         schedules = CourseSchedule.objects.filter(course=obj)
         return ", ".join(f"{schedule.day_of_week} at {schedule.time_slot}" for schedule in schedules)
+
     schedule_summary.short_description = "Schedule"
 
     # Add the new method to list_display if you want to show the schedules in the admin list view
