@@ -10,8 +10,6 @@ class CourseScheduleInline(admin.TabularInline):
     extra = 0
 
 
-
-
 class ClientFileForm(forms.ModelForm):
     delete = forms.BooleanField(
         required=False,  # Make the field optional
