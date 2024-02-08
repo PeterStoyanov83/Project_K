@@ -42,25 +42,48 @@ class Client(models.Model):
         default=False
     )
 
-    # files = models.ManyToManyField(ClientFile, related_name='clients')
-
     def __str__(self):
         return self.name
 
 
 class Course(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True, default="")
+
+    PLATFORM_CHOICES = [
+        ('online', 'Online'),
+        ('in_person', 'In-person'),
+        ('other', 'Other'),
+    ]
+
+    name = models.CharField(
+        max_length=100
+    )
+    description = models.TextField(
+        blank=True,
+        default=""
+    )
+    platform = models.CharField(
+        max_length=10,
+        choices=PLATFORM_CHOICES,
+        default='-----'
+    )
+    other_platform_comment = models.TextField(
+        blank=True,
+        null=True
+    )
     start_date = models.DateField()
     end_date = models.DateField()
-    clients = models.ManyToManyField('Client', related_name='courses')
-    costs = models.FloatField(default=0.00)
+    clients = models.ManyToManyField(
+        'Client',
+        related_name='enrolled_courses',  # This related_name is used in the Client model to access courses
+        blank=True
+    )
 
     def __str__(self):
         # Fetch related CourseSchedule objects and format their information
         schedules = self.schedules.all()
         schedule_str = ", ".join(f"{schedule.day_of_week} at {schedule.time_slot}" for schedule in schedules)
         return f"{self.name} - Schedule: {schedule_str}"
+
 
 class CourseSchedule(models.Model):
     course = models.ForeignKey(Course, related_name='schedules', on_delete=models.CASCADE)
