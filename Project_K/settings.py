@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "clients.apps.AccountsConfig",
-    'admins'
+    'admins',
+    'nested_admin',
 ]
 
 MIDDLEWARE = [

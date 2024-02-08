@@ -7,8 +7,8 @@ from faker import Faker
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Project_K.settings')
 django.setup()
 
-
-from clients.models import Client, ClientFile, Course  # Import your models here
+from clients.models import Client, ClientFile, Course, DAYS_OF_WEEK_CHOICES, \
+    TIME_SLOT_CHOICES  # Import your models here
 
 fake = Faker()
 
@@ -37,15 +37,15 @@ def populate_courses(n=5):
         description = fake.text(max_nb_chars=200)
         start_date = fake.date_between(start_date='-1y', end_date='today')
         end_date = fake.date_between(start_date=start_date, end_date='+1y')
-        day_of_week = random.choice(Course.DAY_OF_WEEK_CHOICES)[0]
-        time_slot = random.choice(Course.TIME_SLOT_CHOICES)[0]
+        day_of_week = random.choice(DAYS_OF_WEEK_CHOICES)[0]  # Use the global variable directly
+        time_slot = random.choice(TIME_SLOT_CHOICES)[0]  # Use the global variable directly
 
         course = Course.objects.create(
             name=name,
             description=description,
             start_date=start_date,
             end_date=end_date,
-            day_of_week=day_of_week,
+            days_of_week=day_of_week,
             time_slot=time_slot,
         )
 
@@ -64,7 +64,7 @@ def populate_client_files(n=20):
         uploaded_at = fake.date_time_between(start_date='-1y', end_date='now')
 
         ClientFile.objects.create(
-            #client=client,
+            client=client,  # Ensure this line is uncommented and correctly assigns a client
             file=f"client_files/{file_name}",  # Note: In a real app, you'd need to handle file uploading differently
             uploaded_at=uploaded_at,
         )

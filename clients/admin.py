@@ -1,97 +1,101 @@
 from django.contrib import admin
+from .models import Client, ClientFile, Course, CourseSchedule
 from django import forms
-from django.utils.html import format_html_join
-from django.utils.safestring import mark_safe
-from .models import Client, ClientFile, Course, DayOfWeek, TimeSlot
+from .forms import ClientFileForm
+from django.utils.html import format_html
 
 
-# Assuming ClientFileForm is correctly defined elsewhere if needed.
+class CourseScheduleInline(admin.TabularInline):
+    model = CourseSchedule
+    extra = 0
 
-class ClientAdminForm(forms.ModelForm):
-    new_file = forms.FileField(required=False, label='Upload New File')
-    # This field will collect the IDs of files to delete.
-    files_to_delete = forms.ModelMultipleChoiceField(
-        queryset=ClientFile.objects.none(), required=False,
-        widget=forms.CheckboxSelectMultiple, label='Mark files for deletion'
+
+
+
+class ClientFileForm(forms.ModelForm):
+    delete = forms.BooleanField(
+        required=False,  # Make the field optional
+        widget=forms.CheckboxInput(attrs={'class': 'delete-checkbox'}),
+        # Use a checkbox widget with a custom class for styling if needed
+        label='Delete'  # The label next to the checkbox
     )
 
     class Meta:
-        model = Client
-        fields = '__all__'
+        model = ClientFile
+        fields = ['file', 'delete']
 
     def __init__(self, *args, **kwargs):
-        super(ClientAdminForm, self).__init__(*args, **kwargs)
-        if self.instance.pk:
-            self.fields['files_to_delete'].queryset = self.instance.files.all()
+        super(ClientFileForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:  # Check if the instance is already saved (i.e., has a primary key)
+            # self.fields['file'].widget = forms.HiddenInput()  # Hide the file input field
+            self.initial['delete'] = False  # Set initial value of delete to False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        delete = cleaned_data.get('delete', False)
+        if delete and self.instance and self.instance.pk:
+            self.instance.file.delete(save=False)  # Delete the file
+        return cleaned_data
 
 
+# Inline class for ClientFile
+class ClientFileInline(admin.TabularInline):
+    model = ClientFile
+    form = ClientFileForm
+    extra = 0  # Number of extra blank forms
+
+    def get_fields(self, request, obj=None):
+        if obj:
+            # obj will be None on the add page, and an instance on the change page
+            return ['file', 'delete']
+        else:
+            return ['file']
+
+    def get_readonly_fields(self, request, obj=None):
+        # Make file readonly when it's already uploaded
+        if obj:
+            return ['file']
+        return []
+
+
+# Admin for ClientFile, if you want to manage it separately as well
+class ClientFileAdmin(admin.ModelAdmin):
+    list_display = ['file', 'client', 'uploaded_at']
+    list_select_related = ['client']
+
+
+# Form for ClientAdmin, to specify which fields to include
 class ClientAdminForm(forms.ModelForm):
-    new_file = forms.FileField(required=False, label='Upload New File')
-
-    # No need for an inline field for deletion, we will handle deletion through actions
-    # in the ClientAdmin class
-
     class Meta:
         model = Client
         fields = '__all__'
 
 
+# Admin for Client, now with ClientFile inline
 class ClientAdmin(admin.ModelAdmin):
     form = ClientAdminForm
-    # No inlines for ClientFile, handle it through readonly_fields and actions
-    readonly_fields = ['uploaded_files']
-
-    def uploaded_files(self, instance):
-        files_html = format_html_join(
-            mark_safe('<br>'),
-            "<a href='{}' target='_blank'>{}</a>",
-            ((f.file.url, f.file.name.split('/')[-1]) for f in instance.files.all())  # Split to get only the file name
-        )
-        return files_html or 'No files uploaded.'
-
-    uploaded_files.short_description = "Uploaded Files"
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-
-        # Handling the new file upload
-        if 'new_file' in form.cleaned_data and form.cleaned_data['new_file']:
-            new_file = form.cleaned_data['new_file']
-            client_file = ClientFile(file=new_file)
-            client_file.save()
-            obj.files.add(client_file)
-
-    # We will use the 'actions' feature of the admin to allow deletion of files
-    actions = ['delete_selected_files']
-
-    def delete_selected_files(self, request, queryset):
-        # Custom action to delete selected files
-        for obj in queryset:
-            obj.files.clear()  # This will remove the relationship to the files without deleting the files themselves
-
-    delete_selected_files.short_description = "Delete selected files from the client"
+    inlines = [ClientFileInline, ]
+    list_display = ['name', 'location', 'date_of_entry', 'date_of_exit', 'signed_agreement', ]
 
 
-# ... Your existing CourseAdmin, DayOfWeekAdmin, TimeSlotAdmin ...
+# Admin for Course
+class CourseAdmin(admin.ModelAdmin):
+    inlines = [CourseScheduleInline,]
 
-class ClientFileAdmin(admin.ModelAdmin):
-    list_display = ('file_link', 'uploaded_at')
-    search_fields = ('file',)
+    # Remove 'days_of_week' and 'time_slot' from list_display
+    list_display = ['name', 'start_date', 'end_date']
+    filter_horizontal = ('clients',)
 
-    def file_link(self, obj):
-        return mark_safe(f"<a href='{obj.file.url}' target='_blank'>{obj.file.name.split('/')[-1]}</a>")
+    # Optionally, you can add a method to display a summary of the schedules
+    def schedule_summary(self, obj):
+        schedules = CourseSchedule.objects.filter(course=obj)
+        return ", ".join(f"{schedule.day_of_week} at {schedule.time_slot}" for schedule in schedules)
+    schedule_summary.short_description = "Schedule"
 
-    file_link.short_description = 'File'
-
-    # Optionally, you can override the 'get_queryset' method to limit the files to those related to a Client.
-    # def get_queryset(self, request):
-    #     qs = super().get_queryset(request)
-    #     return qs.filter(clients__isnull=False)
+    # Add the new method to list_display if you want to show the schedules in the admin list view
+    list_display.append('schedule_summary')
 
 
-# Register other model admins as needed
 admin.site.register(Client, ClientAdmin)
-admin.site.register(ClientFile)
-admin.site.register(Course)
-admin.site.register(DayOfWeek)
-admin.site.register(TimeSlot)
+admin.site.register(ClientFile, ClientFileAdmin)
+admin.site.register(Course, CourseAdmin)
