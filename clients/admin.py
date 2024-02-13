@@ -98,9 +98,7 @@ class CourseAdmin(admin.ModelAdmin):
         return form
 
     def schedule_summary(self, obj):
-        schedules = obj.courseschedule_set.all()
-        return ", ".join(f"{schedule.day_of_week} at {schedule.time_slot}" for schedule in schedules)
-
+        return ", ".join([str(schedule) for schedule in obj.schedules.all()])
     schedule_summary.short_description = "Schedule"
 
 

@@ -82,6 +82,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Keibitz',
+        'TEST': {
+            'NAME': 'test_Keibitz',
+            'MIRROR': 'default',
+        },
         'USER': 'postgres',
         'PASSWORD': 'pass',
         'HOST': 'localhost',

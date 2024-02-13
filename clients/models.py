@@ -85,7 +85,7 @@ class Course(models.Model):
 
 
 class CourseSchedule(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='courseschedule_set')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='schedules')
 
     day_of_week = models.CharField(
         max_length=9,
@@ -133,25 +133,34 @@ class ClientFile(models.Model):
 
 
 class Resource(models.Model):
-    ROOM_CHOICES = [
-        ('room_1', 'Room 1'),
-        ('room_2', 'Room 2'),
-    ]
+    SEAT_CHOICES = [(f'seat_{i}', f'Seat {i}') for i in range(1, 13)]
 
-    room = models.CharField(max_length=6, choices=ROOM_CHOICES)
-    seat_number = models.CharField(max_length=10)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    seat_number = models.CharField(
+        max_length=10,
+        choices=SEAT_CHOICES,
+        unique=True,  # Each seat number is unique across all resources
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+    client = models.ForeignKey(
+        Client,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
 
     class Meta:
         unique_together = (
-            ('room', 'seat_number'),  # No two resources can have the same room, seat_number, and course
-            ('client', 'course'),  # A client cannot be assigned more than one seat in the same course
+            ('seat_number', 'course'),  # A seat can't be assigned to multiple courses at once
         )
 
     def __str__(self):
-        # The course does not need to be mentioned in the string representation if not needed.
-        return f"{self.get_room_display()} Seat {self.seat_number} - {self.client.name}"
+        client_name = self.client.name if self.client else "No client assigned"
+        return f"{self.seat_number} - {client_name}"
 
 
 class Laptop(models.Model):
