@@ -47,7 +47,6 @@ class Client(models.Model):
 
 
 class Course(models.Model):
-
     PLATFORM_CHOICES = [
         ('online', 'Online'),
         ('in_person', 'In-person'),
@@ -86,9 +85,16 @@ class Course(models.Model):
 
 
 class CourseSchedule(models.Model):
-    course = models.ForeignKey(Course, related_name='schedules', on_delete=models.CASCADE)
-    day_of_week = models.CharField(max_length=9, choices=DAYS_OF_WEEK_CHOICES)
-    time_slot = models.CharField(max_length=11, choices=TIME_SLOT_CHOICES)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='courseschedule_set')
+
+    day_of_week = models.CharField(
+        max_length=9,
+        choices=DAYS_OF_WEEK_CHOICES
+    )
+    time_slot = models.CharField(
+        max_length=11,
+        choices=TIME_SLOT_CHOICES
+    )
 
 
 class DayOfWeek(models.Model):
@@ -115,8 +121,63 @@ class ClientFile(models.Model):
         on_delete=models.CASCADE,
         null=True
     )
-    file = models.FileField(upload_to='client_files/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(
+        upload_to='client_files/'
+    )
+    uploaded_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     def __str__(self):
         return os.path.basename(self.file.name)
+
+
+class Resource(models.Model):
+    ROOM_CHOICES = [
+        ('room_1', 'Room 1'),
+        ('room_2', 'Room 2'),
+    ]
+
+    room = models.CharField(max_length=6, choices=ROOM_CHOICES)
+    seat_number = models.CharField(max_length=10)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (
+            ('room', 'seat_number'),  # No two resources can have the same room, seat_number, and course
+            ('client', 'course'),  # A client cannot be assigned more than one seat in the same course
+        )
+
+    def __str__(self):
+        # The course does not need to be mentioned in the string representation if not needed.
+        return f"{self.get_room_display()} Seat {self.seat_number} - {self.client.name}"
+
+
+class Laptop(models.Model):
+    LAPTOP_CHOICES = [
+        ('laptop1', 'Laptop 1'),
+        ('laptop2', 'Laptop 2'),
+        ('laptop3', 'Laptop 3'),
+        ('laptop4', 'Laptop 4'),
+    ]
+    name = models.CharField(
+        max_length=10,
+        choices=LAPTOP_CHOICES,
+        unique=True)
+    assigned_to = models.ForeignKey(
+        Client,
+        related_name='assigned_laptops',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    period_start = models.DateField()
+    period_end = models.DateField()
+    comments = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return self.get_name_display()

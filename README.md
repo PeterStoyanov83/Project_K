@@ -3,18 +3,49 @@
 Project K is a Django-based project focused on data management and administrative control. It includes two primary
 Django apps for different functionalities.
 
-After the research a new repository was open. 
+After the research a new repository was open.
 
-[here is the link to the research](https://github.com/PeterStoyanov83/research_for_project_K) 
+[here is the link to the research](https://github.com/PeterStoyanov83/research_for_project_K)
 
+# Development stage:
 
+## 13.02.24 - Development sprint 1 ( 05.02.24 - 13.02.24)
 
-## 05.02.24 - Editing and customisation in representation of the data. 
+### Client:
+
+Represents individuals or entities enrolling in courses. Contains basic information such as name, location, and
+agreement status.
+
+### Course:
+
+Represents a course offering. It includes details like the course name, description, platform (online, in-person, or
+other), and associated clients through a many-to-many relationship.
+
+### CourseSchedule:
+
+Defines specific schedules for courses, including the day of the week and time slot. It's related to the Course model
+via a foreign key.
+
+### ClientFile:
+
+Used to store files associated with a client, potentially for documentation or other purposes. It includes a file field
+and is linked to the Client model.
+
+### Resource:
+
+Manages resources like room and seat assignments for clients in courses. It ensures unique assignments through its model
+constraints.
+
+### Laptop:
+
+Tracks laptops that may be assigned to clients. It includes fields for identifying the laptop, the client it's assigned
+to, and the assignment period.
+
+## 05.02.24 - Editing and customisation in representation of the data.
 
 - work on the custom views, admin and urls.(not entirely finished)
 
-## 31.01.24 - Initialising the project 
-
+## 31.01.24 - Initialising the project
 
 ### Django Project Setup
 
@@ -54,9 +85,10 @@ After the research a new repository was open.
 
 - Successfully created a superuser for administrative access to the Django admin site.
 
-
 ### Testing the Data Functionality
 
-- Creating a Python script that populates the database with dummy data to test the functionality and representation for the end user.
-- The script is implemented as a command in the 'clients' app. It can be run using the command `python manage.py populate_data`.
+- Creating a Python script that populates the database with dummy data to test the functionality and representation for
+  the end user.
+- The script is implemented as a command in the 'clients' app. It can be run using the
+  command `python manage.py populate_data`.
 

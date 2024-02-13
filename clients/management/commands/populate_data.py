@@ -8,7 +8,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Project_K.settings')
 django.setup()
 
 from clients.models import Client, ClientFile, Course, DAYS_OF_WEEK_CHOICES, \
-    TIME_SLOT_CHOICES  # Import your models here
+    TIME_SLOT_CHOICES, CourseSchedule, Resource  # Import your models here
 
 fake = Faker()
 
@@ -31,28 +31,18 @@ def populate_clients(n=10):
         )
 
 
-def populate_courses(n=5):
-    for _ in range(n):
-        name = f"{fake.word().capitalize()} {fake.word().capitalize()}"
-        description = fake.text(max_nb_chars=200)
-        start_date = fake.date_between(start_date='-1y', end_date='today')
-        end_date = fake.date_between(start_date=start_date, end_date='+1y')
-        day_of_week = random.choice(DAYS_OF_WEEK_CHOICES)[0]  # Use the global variable directly
-        time_slot = random.choice(TIME_SLOT_CHOICES)[0]  # Use the global variable directly
-
-        course = Course.objects.create(
-            name=name,
-            description=description,
-            start_date=start_date,
-            end_date=end_date,
-            days_of_week=day_of_week,
-            time_slot=time_slot,
-        )
-
-        # Optionally, associate some clients with this course
-        clients = list(Client.objects.all())
-        for client in random.sample(clients, k=random.randint(1, min(5, len(clients)))):
-            course.clients.add(client)
+def populate_course_schedules(n=20):
+    courses = Course.objects.all()
+    for course in courses:
+        # Assuming each course can have multiple schedules
+        for _ in range(random.randint(1, 3)):  # Random number of schedules for each course
+            day_of_week = random.choice(DAYS_OF_WEEK_CHOICES)[0]
+            time_slot = random.choice(TIME_SLOT_CHOICES)[0]
+            CourseSchedule.objects.create(
+                course=course,
+                day_of_week=day_of_week,
+                time_slot=time_slot,
+            )
 
 
 def populate_client_files(n=20):
@@ -70,14 +60,33 @@ def populate_client_files(n=20):
         )
 
 
+def populate_resources():
+    courses = Course.objects.all()
+    clients = Client.objects.all()
+    room_choices = ['room_1', 'room_2']
+
+    for course in courses:
+        for client in random.sample(list(clients), k=random.randint(1, min(5, len(clients)))):
+            room = random.choice(room_choices)
+            seat_number = str(random.randint(1, 8)) if room == 'room_1' else str(random.randint(1, 4))
+            Resource.objects.create(
+                room=room,
+                seat_number=seat_number,
+                course=course,
+                client=client,
+            )
+
+
 class Command(BaseCommand):
     help = 'Populate the database with sample data'
 
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.SUCCESS('Populating Clients...'))
-        populate_clients(10)
-        self.stdout.write(self.style.SUCCESS('Populating Courses...'))
-        populate_courses(5)
+        populate_clients(50)
+        self.stdout.write(self.style.SUCCESS('Populating Course Schedules...'))
+        populate_course_schedules(15)  # Adjusted to call the correct function
         self.stdout.write(self.style.SUCCESS('Populating ClientFiles...'))
-        populate_client_files(20)
-        self.stdout.write(self.style.SUCCESS('Populating Complete!'))
+        populate_client_files(100)
+        self.stdout.write(self.style.SUCCESS('Populating Resources...'))
+        populate_resources()  # Ensure this function is called to populate Resources
+        self.stdout.write(self.style.SUCCESS('Data Population Complete!'))
