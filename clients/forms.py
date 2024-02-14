@@ -13,10 +13,10 @@ class ClientForm(forms.ModelForm):
 
 
 class ClientFileForm(forms.ModelForm):
-    DELETE_CHOICES = [
-        (True, 'Yes'),
-        (False, 'No')
-    ]
+    # DELETE_CHOICES = [
+    #     (True, 'Yes'),
+    #     (False, 'No')
+    # ]
 
     class Meta:
         model = ClientFile
@@ -44,28 +44,27 @@ class ResourceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ResourceForm, self).__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
-            self.fields['seat_number'].queryset = self.get_seat_queryset()
+            self.fields['seat_number'].queryset = self.get_seat_choices()
 
-    def get_seat_queryset(self):
-        # Adjust the queryset based on room and current assignments
-        if self.instance.room == 'room_1':
-            taken_seats = Resource.objects.filter(
-                room='room_1',
-                course=self.instance.course).values_list(
-                'seat_number',
-                flat=True
-            )
-            return range(1, 9)  # Assuming seat numbers are 1 through 8
-        elif self.instance.room == 'room_2':
-            taken_seats = Resource.objects.filter(
-                room='room_2',
-                course=self.instance.course).values_list(
-                'seat_number',
-                flat=True
-            )
-            return range(1, 5)  # Assuming seat numbers are 1 through 4
-        else:
-            return range(1, 9)  # Default range if room not set
+    def get_seat_choices(self):
+        total_seats = 12  # Total number of seats available
+        # Fetch all seat numbers that are already taken for the course
+        taken_seats = Resource.objects.filter(
+            course=self.instance.course
+        ).values_list('seat_number', flat=True)
+        # Generate choices for seat numbers that are not taken
+        available_seats = [
+            (str(seat),f'Seat {seat}')
+            for seat in range(1, total_seats + 1)
+            if str(seat) not in taken_seats]
+        return available_seats
+
+    def clean_seat_number(self):
+        seat_number = self.cleaned_data['seat_number']
+        # Check if the seat number is still available
+        if Resource.objects.filter(seat_number=seat_number, course=self.instance.course).exists():
+            raise ValidationError(f"Seat {seat_number} is already taken. Please choose a different seat.")
+        return seat_number
 
 
 class LaptopForm(forms.ModelForm):
