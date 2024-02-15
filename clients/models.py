@@ -46,6 +46,14 @@ class Client(models.Model):
     def __str__(self):
         return self.name
 
+    assigned_laptop = models.ForeignKey(
+        'Laptop',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_to_client'
+    )
+
 
 class Course(models.Model):
     PLATFORM_CHOICES = [
@@ -79,28 +87,20 @@ class Course(models.Model):
     )
 
     def __str__(self):
-        # Fetch related CourseSchedule objects and format their information
         schedules = self.schedules.all()
-        schedule_str = ", ".join(f"{schedule.day_of_week} at {schedule.time_slot}" for schedule in schedules)
+        schedule_parts = []
+        for schedule in schedules:
+            days = schedule.days.all()
+            for day in days:
+                schedule_parts.append(day.name)
+        schedule_str = ", ".join(schedule_parts)
         return f"{self.name} - Schedule: {schedule_str}"
-
-
-class CourseSchedule(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='schedules')
-
-    day_of_week = models.CharField(
-        max_length=9,
-        choices=DAYS_OF_WEEK_CHOICES
-    )
-    time_slot = models.CharField(
-        max_length=11,
-        choices=TIME_SLOT_CHOICES
-    )
 
 
 class DayOfWeek(models.Model):
     name = models.CharField(
-        max_length=15
+        choices=DAYS_OF_WEEK_CHOICES,
+        max_length=20,
     )
 
     def __str__(self):
@@ -113,6 +113,22 @@ class TimeSlot(models.Model):
 
     def __str__(self):
         return f"{self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
+
+
+# clients/models.py
+class CourseSchedule(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='schedules')
+    days = models.ManyToManyField('DayOfWeek', related_name='course_schedules', blank=True)
+
+    def __str__(self):
+        schedule_parts = []
+        for day in self.days.prefetch_related('time_slot').all():
+            part = day.name
+            if day.time_slot:
+                part += f" at {day.time_slot}"
+            schedule_parts.append(part)
+        schedule_str = ", ".join(schedule_parts)
+        return f"{self.course.name} - Schedule: {schedule_str}"
 
 
 class ClientFile(models.Model):
@@ -139,8 +155,11 @@ class Resource(models.Model):
     seat_number = models.CharField(
         max_length=10,
         choices=SEAT_CHOICES,
-        unique=True,  # Each seat number is unique across all resources
+        blank=True,
+        null=True,
+        unique=False
     )
+
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
