@@ -1,5 +1,7 @@
+# clients/admin.py
 from django.contrib import admin
-from .models import Client, ClientFile, Course, CourseSchedule, Resource, Laptop, Notification
+from .models import Client, ClientFile, Course, CourseSchedule, Resource, Laptop, Notification, ScheduleEntry, \
+    CourseScheduleEntry
 from .forms import ClientFileForm, ResourceForm, LaptopForm
 from django.utils.html import format_html
 
@@ -29,23 +31,64 @@ class CourseInline(admin.StackedInline):
     verbose_name_plural = "Course Enrollments"
 
 
+class ScheduleEntryInline(admin.StackedInline):
+    model = ScheduleEntry
+    fields = ('monday', 'monday_time_slot', 'tuesday', 'tuesday_time_slot',
+              'wednesday', 'wednesday_time_slot', 'thursday', 'thursday_time_slot',
+              'friday', 'friday_time_slot')
+    extra = 0
+
+
+class CourseScheduleEntryInline(admin.TabularInline):
+    model = CourseScheduleEntry
+    extra = 0
+
+
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('name', 'platform', 'start_date', 'end_date')
+    inlines = [ScheduleEntryInline]
+    filter_horizontal = ('clients',)
+
+
+@admin.register(ScheduleEntry)
+class ScheduleEntryAdmin(admin.ModelAdmin):
+    list_display = (
+        'course_display',
+        'monday_time_slot',
+        'tuesday_time_slot',
+        'wednesday_time_slot',
+        'thursday_time_slot',
+        'friday_time_slot'
+    )
+
+    fieldsets = (
+        (None, {
+            'fields': (('course',),
+                       ('monday', 'monday_time_slot'),
+                       ('tuesday', 'tuesday_time_slot'),
+                       ('wednesday', 'wednesday_time_slot'),
+                       ('thursday', 'thursday_time_slot'),
+                       ('friday', 'friday_time_slot'))
+        }),
+    )
+
+    def course_display(self, obj):
+        return obj.course.name if obj.course else "No Course Assigned"
+
+    course_display.short_description = "Course"
+
+
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
     inlines = [ClientFileInline, ResourceInline, CourseInline]
 
     list_display = ('name', 'location', 'date_of_entry', 'date_of_exit', 'signed_agreement')
     fieldsets = (
-        (None, {  # The name of the fieldset is None, which means it won't display a title for the fieldset
+        (None, {
             'fields': ('name', 'location', 'date_of_entry', 'date_of_exit', 'signed_agreement', 'assigned_laptop'),
         }),
-        # ... other fieldsets as needed ...
     )
-
-
-@admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'platform', 'start_date', 'end_date')
-    filter_horizontal = ('clients',)
 
 
 class CourseScheduleAdmin(admin.ModelAdmin):
@@ -54,6 +97,7 @@ class CourseScheduleAdmin(admin.ModelAdmin):
     def get_schedule(self, obj):
         days = obj.days.all()
         return ", ".join(day.name for day in days)
+
     get_schedule.short_description = "Schedule"
 
 

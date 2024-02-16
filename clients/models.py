@@ -87,14 +87,19 @@ class Course(models.Model):
     )
 
     def __str__(self):
-        schedules = self.schedules.all()
-        schedule_parts = []
-        for schedule in schedules:
-            days = schedule.days.all()
-            for day in days:
-                schedule_parts.append(day.name)
-        schedule_str = ", ".join(schedule_parts)
-        return f"{self.name} - Schedule: {schedule_str}"
+        return f"{self.name}"
+
+    # def __str__(self):
+    #     schedule_entries = CourseSchedule.objects.filter(course=self).values_list('schedule_entries', flat=True)
+    #     entries_str_list = []
+    #     for entry_id in schedule_entries:
+    #         try:
+    #             entry = ScheduleEntry.objects.get(id=entry_id)
+    #             entries_str_list.append(str(entry))
+    #         except ScheduleEntry.DoesNotExist:
+    #             continue
+    #     schedule_str = ", ".join(entries_str_list)
+    #     return f"{self.name} - Schedule: {schedule_str}"
 
 
 class DayOfWeek(models.Model):
@@ -115,20 +120,60 @@ class TimeSlot(models.Model):
         return f"{self.start_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
 
 
-# clients/models.py
-class CourseSchedule(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='schedules')
-    days = models.ManyToManyField('DayOfWeek', related_name='course_schedules', blank=True)
+class ScheduleEntry(models.Model):
+    monday = models.BooleanField(default=False)
+    monday_time_slot = models.CharField(max_length=11, choices=TIME_SLOT_CHOICES, null=True, blank=True)
+
+    tuesday = models.BooleanField(default=False)
+    tuesday_time_slot = models.CharField(max_length=11, choices=TIME_SLOT_CHOICES, null=True, blank=True)
+
+    wednesday = models.BooleanField(default=False)
+    wednesday_time_slot = models.CharField(max_length=11, choices=TIME_SLOT_CHOICES, null=True, blank=True)
+
+    thursday = models.BooleanField(default=False)
+    thursday_time_slot = models.CharField(max_length=11, choices=TIME_SLOT_CHOICES, null=True, blank=True)
+
+    friday = models.BooleanField(default=False)
+    friday_time_slot = models.CharField(max_length=11, choices=TIME_SLOT_CHOICES, null=True, blank=True)
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='schedule_entries')
 
     def __str__(self):
-        schedule_parts = []
-        for day in self.days.prefetch_related('time_slot').all():
-            part = day.name
-            if day.time_slot:
-                part += f" at {day.time_slot}"
-            schedule_parts.append(part)
-        schedule_str = ", ".join(schedule_parts)
-        return f"{self.course.name} - Schedule: {schedule_str}"
+        days_str = []
+        for day, slot in [
+            ('Monday', self.monday_time_slot),
+            # Repeat for other days
+        ]:
+            if getattr(self, day.lower()):
+                days_str.append(f"{day}: {slot or 'No time slot selected'}")
+        return f"{self.course.name} - {'; '.join(days_str)}"
+
+    def get_schedule_display(self):
+        days_str = []
+        for day, slot in [
+            ('Monday', self.monday_time_slot),
+            ('Tuesday', self.tuesday_time_slot),
+            ('Wednesday', self.wednesday_time_slot),
+            ('Thursday', self.thursday_time_slot),
+            ('Friday', self.friday_time_slot)
+        ]:
+            if getattr(self, day.lower()):
+                days_str.append(f"{day}: {slot or 'No time slot selected'}")
+        return ', '.join(days_str)
+
+
+class CourseSchedule(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='schedules')
+    entries = models.ManyToManyField(ScheduleEntry, through='CourseScheduleEntry', related_name='course_schedules',
+                                     blank=True)
+
+    def __str__(self):
+        return f"{self.course.name} - Schedule: {', '.join(str(entry) for entry in self.entries.all())}"
+
+
+class CourseScheduleEntry(models.Model):
+    course_schedule = models.ForeignKey(CourseSchedule, on_delete=models.CASCADE)
+    schedule_entry = models.ForeignKey(ScheduleEntry, on_delete=models.CASCADE)
 
 
 class ClientFile(models.Model):
