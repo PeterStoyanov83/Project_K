@@ -1,8 +1,8 @@
 #clients/forms.py
 
 from django import forms
-from .models import ClientFile, Resource, Laptop
-
+from .models import ClientFile, Resource, Laptop, Client, Course
+from django.urls import reverse_lazy
 
 class ClientFileForm(forms.ModelForm):
     class Meta:
@@ -28,3 +28,14 @@ class LaptopForm(forms.ModelForm):
     class Meta:
         model = Laptop
         fields = '__all__'
+
+
+class ClientForm(forms.ModelForm):
+    class Meta:
+        model = Client
+        fields = ['name', 'location', 'date_of_entry', 'date_of_exit', 'signed_agreement']
+
+class CourseForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ['name', 'description', 'platform', 'start_date', 'end_date', 'clients']
