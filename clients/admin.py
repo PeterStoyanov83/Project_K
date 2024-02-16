@@ -1,7 +1,19 @@
 # clients/admin.py
 from django.contrib import admin
-from .models import Client, ClientFile, Course, CourseSchedule, Resource, Laptop, Notification, ScheduleEntry, \
-    CourseScheduleEntry
+from django.core.checks import messages
+from django.db.models import Q
+
+from .models import (Client,
+                     ClientFile,
+                     Course,
+                     CourseSchedule,
+                     Resource,
+                     Laptop,
+                     Notification,
+                     ScheduleEntry,
+                     CourseScheduleEntry,
+                     DAYS_OF_WEEK_CHOICES)
+
 from .forms import ClientFileForm, ResourceForm, LaptopForm
 from django.utils.html import format_html
 
@@ -77,6 +89,33 @@ class ScheduleEntryAdmin(admin.ModelAdmin):
         return obj.course.name if obj.course else "No Course Assigned"
 
     course_display.short_description = "Course"
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+        # Check for conflicts after saving
+        conflicts = self.check_for_conflicts(obj)
+
+        # If conflicts were found, display a message in the admin interface
+        if conflicts:
+            message = f'Conflicts detected for {obj.course.name}: {", ".join(conflicts)}. Please resolve them.'
+            messages.add_message(request, messages.ERROR, message)
+
+    def check_for_conflicts(self, schedule_entry):
+        # Get all other schedule entries for the same course that are not the current instance
+        other_entries = ScheduleEntry.objects.filter(course=schedule_entry.course).exclude(pk=schedule_entry.pk)
+
+        # Check each day for conflicts
+        conflicts = []
+        for day, _ in DAYS_OF_WEEK_CHOICES:
+            if getattr(schedule_entry, day.lower()):
+                time_slot = getattr(schedule_entry, f"{day.lower()}_time_slot")
+                # Build a query to find other entries with the same day and time slot
+                query = Q(**{f"{day.lower()}": True, f"{day.lower()}_time_slot": time_slot})
+                if other_entries.filter(query).exists():
+                    conflicts.append(f'{day} at {time_slot}')
+
+        return conflicts
 
 
 @admin.register(Client)

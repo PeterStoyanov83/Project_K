@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "clients.apps.AccountsConfig",
+    'clients.apps.ClientsConfig',
     'admins',
     'nested_admin',
 ]
@@ -90,6 +90,21 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     }
+}
+
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
 }
 
 # CACHES = {
