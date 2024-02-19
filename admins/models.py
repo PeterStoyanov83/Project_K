@@ -1,5 +1,5 @@
-from django.contrib.auth.models import User
-
-
-class Admin(User):
-    pass  # For now, no additional fields are added
+# from django.contrib.auth.models import AbstractUser
+#
+# class CustomUser(AbstractUser):
+#     # Add any additional fields here
+#     pass

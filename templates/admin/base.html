@@ -6,13 +6,23 @@
 
 {% block title %}My Admin - {{ title }}{% endblock %}
 
-
 {% block branding %}
-<h1 id="site-name"><a href="{% url 'admin:index' %}">Project K</a></h1>
+    <h1 id="site-name"><a href="{% url 'admin:index' %}">Project K</a></h1>
 {% endblock %}
 
 {% block extrastyle %}
-<style>
-    /* Add custom styles here */
-</style>
+    <style>
+        /* Add custom styles here */
+        body {
+            background-color: #f4f4f4; /* Light Gray */
+            font-family: Arial, sans-serif;
+        }
+        #site-name a {
+            color: #333; /* Dark Gray */
+            text-decoration: none;
+        }
+        #site-name a:hover {
+            color: #666; /* Medium Gray */
+        }
+    </style>
 {% endblock %}

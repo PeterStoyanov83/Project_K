@@ -1,10 +1,38 @@
-{% extends "base.html" %}
+{{% extends "clients/base.html" %}
+{% load i18n static %}
+
+{% block title %}Edit Client{% endblock %}
+
 {% block content %}
-    <a id="files"></a>
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    {{ file_form.as_p }}
-    <button type="submit">Save Changes</button>
-</form>
+    <style>
+        form {
+            background-color: rgba(0, 0, 117, 0.65); /* Navy Blue */
+            color: rgba(250, 128, 114, 0.47); /* Salmon */
+            padding: 1em;
+            margin-bottom: 1em;
+        }
+        button {
+            background-color: rgba(250, 128, 114, 0.47); /* Salmon */
+            color: rgba(0, 0, 117, 0.65); /* Navy Blue */
+            border: none;
+            padding: 0.5em 1em;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: rgba(0, 0, 117, 0.65); /* Navy Blue */
+            color: rgba(250, 128, 114, 0.47); /* Salmon */
+        }
+    </style>
+
+    <h1>Edit Client</h1>
+
+    <a href="{% url 'client_detail' client.pk %}">Back to Client Detail</a>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {{ file_form.as_p }}
+        <button type="submit">Save Changes</button>
+    </form>
 {% endblock %}

@@ -1,25 +1,57 @@
-{% extends "clients/admins/templates/base.html" %}
+{% extends "clients/base.html" %}
+{% load i18n static %}
 
 {% block title %}Client List{% endblock %}
 
 {% block content %}
-<h1>Client List</h1>
-<table>
-    <thead>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #FA8072; /* Salmon */
+            padding: 0.5em;
+        }
+        th {
+            background-color: #FA8072; /* Salmon */
+            color: #000080; /* Navy Blue */
+        }
+        td {
+            background-color: #000080; /* Navy Blue */
+            color: #FA8072; /* Salmon */
+        }
+        a {
+            color: #FA8072; /* Salmon */
+        }
+        a:hover {
+            color: #000080; /* Navy Blue */
+        }
+    </style>
+
+    <h1>Client List</h1>
+
+    <table>
+        <thead>
         <tr>
             <th>Name</th>
             <th>Location</th>
             <!-- Add other table headers here -->
+            <th>Actions</th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         {% for client in clients %}
-        <tr>
-            <td>{{ client.name }}</td>
-            <td>{{ client.location }}</td>
-            <!-- Add other client details here -->
-        </tr>
+            <tr>
+                <td><a href="{% url 'client_detail' client.pk %}">{{ client.name }}</a></td>
+                <td>{{ client.location }}</td>
+                <!-- Add other client details here -->
+                <td>
+                    <a href="{% url 'client_edit' client.pk %}">Edit</a> |
+                    <a href="{% url 'client_delete' client.pk %}">Delete</a>
+                </td>
+            </tr>
         {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
 {% endblock %}

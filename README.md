@@ -9,6 +9,12 @@ After the research a new repository was open.
 
 # Development stage:
 
+## 16.02.24 - Phase 1 - complete: 
+### Full basic functionality of database ready :
+  #### - Client: 
+  #### - Courses: 
+  #### - 
+
 ## 13.02.24 - Development sprint 1 ( 05.02.24 - 13.02.24)
 
 ### Client:

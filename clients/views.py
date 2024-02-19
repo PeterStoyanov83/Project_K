@@ -1,12 +1,13 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from django.views.generic import CreateView, UpdateView, DeleteView
+from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
 
 from .forms import ClientForm, CourseForm
 from .models import Client, Course, Notification
+
 
 @login_required
 @require_POST
@@ -17,24 +18,28 @@ def mark_notification_read(request, notification_id):
     return JsonResponse({'status': 'success'})
 
 
-def client_list(request):
-    clients = Client.objects.all()
-    return render(request, 'clients/client_list.html', {'clients': clients})
+class ClientListView(ListView):
+    model = Client
+    template_name = 'clients/client_list.html'
+    context_object_name = 'clients'
 
 
-def client_detail(request, pk):
-    client = get_object_or_404(Client, pk=pk)
-    return render(request, 'clients/client_detail.html', {'client': client})
+class ClientDetailView(DetailView):
+    model = Client
+    template_name = 'clients/client_detail.html'
+    context_object_name = 'client'
 
 
-def course_list(request):
-    courses = Course.objects.all()
-    return render(request, 'clients/course_list.html', {'courses': courses})
+class CourseListView(ListView):
+    model = Course
+    template_name = 'clients/course_list.html'
+    context_object_name = 'courses'
 
 
-def course_detail(request, pk):
-    course = get_object_or_404(Course, pk=pk)
-    return render(request, 'clients/course_detail.html', {'course': course})
+class CourseDetailView(DetailView):
+    model = Course
+    template_name = 'clients/course_detail.html'
+    context_object_name = 'course'
 
 
 class ClientCreateView(CreateView):

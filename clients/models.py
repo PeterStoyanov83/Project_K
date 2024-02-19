@@ -204,7 +204,6 @@ class Resource(models.Model):
         null=True,
         unique=False
     )
-
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
@@ -227,6 +226,11 @@ class Resource(models.Model):
         client_name = self.client.name if self.client else "No client assigned"
         return f"{self.seat_number} - {client_name}"
 
+    def display_assigned_laptops(self):
+        return ', '.join([laptop.name for laptop in self.laptops.all()])
+
+    display_assigned_laptops.short_description = "Assigned Laptops"
+
 
 class Laptop(models.Model):
     LAPTOP_CHOICES = [
@@ -238,10 +242,18 @@ class Laptop(models.Model):
     name = models.CharField(
         max_length=10,
         choices=LAPTOP_CHOICES,
-        unique=True)
+        unique=True
+    )
     assigned_to = models.ForeignKey(
         Client,
-        related_name='assigned_laptops',
+        related_name='assigned_client_laptops',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    assigned_to_resource = models.ForeignKey(
+        Resource,
+        related_name='laptops',  # Specify a related_name for the relationship
         on_delete=models.SET_NULL,
         null=True,
         blank=True

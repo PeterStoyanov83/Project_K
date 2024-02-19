@@ -56,6 +56,12 @@ class CourseScheduleEntryInline(admin.TabularInline):
     extra = 0
 
 
+class LaptopInLine(admin.TabularInline):
+    model = Laptop
+    extra = 0
+    fields = ('name', 'assigned_to', 'period_start', 'period_end')  # Specify the correct field names
+
+
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('name', 'platform', 'start_date', 'end_date')
@@ -140,14 +146,15 @@ class CourseScheduleAdmin(admin.ModelAdmin):
     get_schedule.short_description = "Schedule"
 
 
-@admin.register(Resource)
-class ResourceAdmin(admin.ModelAdmin):
-    list_display = ('seat_number', 'course', 'client')
-
-
 @admin.register(Laptop)
 class LaptopAdmin(admin.ModelAdmin):
     list_display = ('name', 'assigned_to', 'period_start', 'period_end')
+
+
+@admin.register(Resource)
+class ResourceAdmin(admin.ModelAdmin):
+    list_display = ('seat_number', 'course', 'client')
+    # inlines = [LaptopInLine]
 
 
 @admin.register(Notification)

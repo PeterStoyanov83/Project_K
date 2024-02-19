@@ -1,24 +1,60 @@
-{% extends "admin/base_site.html" %}
+{% extends "clients/base.html" %}
+{% load i18n static %}
+
+{% block title %}Client Files{% endblock %}
 
 {% block content %}
-<div class="module">
-    <h1>Files for {{ client.name }}</h1>
+    <style>
+        .module {
+            background-color: #000080; /* Navy Blue */
+            color: #FA8072; /* Salmon */
+            padding: 1em;
+            margin-bottom: 1em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #FA8072; /* Salmon */
+            padding: 0.5em;
+        }
+        th {
+            background-color: #FA8072; /* Salmon */
+            color: #000080; /* Navy Blue */
+        }
+        td {
+            background-color: #000080; /* Navy Blue */
+            color: #FA8072; /* Salmon */
+        }
+        a {
+            color: #FA8072; /* Salmon */
+        }
+        a:hover {
+            color: #000080; /* Navy Blue */
+        }
+    </style>
 
-    <table>
-        <tr>
-            <th>File Name</th>
-            <th>Uploaded At</th>
-        </tr>
-        {% for file in client.files.all %}
-        <tr>
-            <td><a href="{{ file.file.url }}">{{ file.file.name }}</a></td>
-            <td>{{ file.uploaded_at }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="2">No files have been uploaded for this client.</td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
+    <div class="module">
+        <h1>Files for {{ client.name }}</h1>
+
+        <a href="{% url 'client_profile' client.id %}">Back to Client Profile</a>
+
+        <table>
+            <tr>
+                <th>File Name</th>
+                <th>Uploaded At</th>
+            </tr>
+            {% for file in client.files.all %}
+                <tr>
+                    <td><a href="{{ file.file.url }}">{{ file.file.name }}</a></td>
+                    <td>{{ file.uploaded_at }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">No files have been uploaded for this client.</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 {% endblock %}

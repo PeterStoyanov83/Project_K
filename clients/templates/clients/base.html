@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Keibitz</title>
+    <style>
+        /* ...existing styles... */
+        .navbar {
+            background-color: rgba(0, 0, 128, 0.76); /* Navy Blue */
+            padding: 1em;
+        }
+        .navbar a {
+            margin-right: 1em;
+            color: rgba(250, 128, 114, 0.47); /* Salmon */
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <a href="{% url 'clients:client_list' %}">Clients</a>
+    <a href="{% url 'clients:course_list' %}">Courses</a>
+</div>
+<div class="container">
+    {% block content %}
+        <!-- Content goes here -->
+    {% endblock %}
+</div>
+</body>
+</html>
